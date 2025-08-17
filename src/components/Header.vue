@@ -56,6 +56,7 @@ import { useNotificacionStore } from '@/stores/notificaciones';
       'uppercase font-bold'
     ]">Favoritos</span>
   </RouterLink>
+  
   <RouterLink :to="{ name: 'ia' }" v-slot="{ isExactActive }">
     <span :class="[
       isExactActive ? 'text-orange-500' : 'text-white',

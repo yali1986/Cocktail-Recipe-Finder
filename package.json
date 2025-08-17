@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preinstall": "npx npm-force-resolutions"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
@@ -15,6 +16,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "ai": "^5.0.0-beta.12",
     "axios": "^1.10.0",
+    "pinia": "^3.0.3",
     "tailwindcss": "^4.1.11",
     "vue": "^3.5.17",
     "vue-router": "^4.5.1",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
+    "npm-force-resolutions": "^0.0.10",
     "vite": "^7.0.0",
     "vite-plugin-vue-devtools": "^7.7.7"
   },
