@@ -16,15 +16,45 @@ export const useBebidasStore = defineStore('bebidas', () => {
 
   })
 
+  const traducciones = {
+  "Cocktail": "Cóctel",
+  "Ordinary Drink": "Bebida común",
+  "Punch / Party Drink": "Ponche / Bebida de fiesta",
+  "Shake": "Batido",
+  "Other / Unknown": "Otro / Desconocido",
+  "Cocoa": "Cacao",
+  "Shot": "Chupito",
+  "Coffee / Tea": "Café / Té",
+  "Homemade Liqueur": "Licor casero",
+  "Beer": "Cerveza",
+  "Soft Drink": "Refresco"
+}
+
+  const traduccionesInversas = Object.fromEntries(
+  Object.entries(traducciones).map(([en, es]) => [es, en])
+)
+
   onMounted(async function () {
-     const {data: {drinks}} = await APIService.obtenerCategorias()
-    categorias.value =  drinks    
+    try {
+      const {data: {drinks}} = await APIService.obtenerCategorias()
+    categorias.value =  drinks.map(catEs => ({
+    strCategory: traducciones[catEs.strCategory] || catEs.strCategory
+    }))   
+    } catch(error) {
+      console.error('Error cargando categorías:', error)
+    }     
   })
 
   async function obtenerRecetas() {
-   const {data: {drinks}} = await APIService.buscarRecetas(busqueda)
-   recetas.value = drinks
+  const categoriaOriginal = traduccionesInversas[busqueda.categoria] || busqueda.categoria
+  const datosBusqueda = {
+    ...busqueda,
+    categoria: categoriaOriginal
   }
+
+  const { data: { drinks } } = await APIService.buscarRecetas(datosBusqueda)
+  recetas.value = drinks
+}
 
   async function seleccionarBebida(id) {
   const {data: {drinks}} = await APIService.buscarReceta(id)
