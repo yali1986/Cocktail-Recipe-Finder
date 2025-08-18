@@ -20,7 +20,22 @@ const router = createRouter({
         name: 'ia',
         component: ()=> import('../views/IAView.vue')
      }
-    ]
+    ],
+    // para el scroll en inicio al resultado de recetas
+ scrollBehavior(to, from, savedPosition) {
+  if (savedPosition) {
+    return savedPosition
+  }
+
+  if (to.hash && to.hash !== '#') {   // solo hace scroll si el hash NO está vacío
+    return {
+      el: to.hash,
+      behavior: 'smooth',
+    }
+  }
+
+  return { top: 0 }
+}
 })
 
 export default router

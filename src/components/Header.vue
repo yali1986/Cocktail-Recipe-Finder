@@ -1,32 +1,40 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, nextTick } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { useBebidasStore } from '../stores/bebidas';
 import { useNotificacionStore } from '@/stores/notificaciones';
+import { useRouter } from 'vue-router';
 
- const route = useRoute()
- const store = useBebidasStore()
- const notificaciones = useNotificacionStore()
 
- const paginaInicio = computed(()=> route.name === 'inicio')
+const router = useRouter()
+const route = useRoute()
+const store = useBebidasStore()
+const notificaciones = useNotificacionStore()
 
- const handleSubmit = () => {
-    if(Object.values(store.busqueda).includes('') ) {
-      // notificaciones.texto = 'Todos los campos son obligatorios'
-      // notificaciones.mostrar = true
-      // notificaciones.error = true
+const paginaInicio = computed(() => route.name === 'inicio')
 
-      notificaciones.$patch({
-        texto : 'Todos los campos son obligatorios',
-        mostrar: true,
-        error: true
-      })
-      return
-    }
-    store.obtenerRecetas()
- }
+const handleSubmit = async () => {
+  if (Object.values(store.busqueda).includes('')) {
+    notificaciones.$patch({
+      texto: 'Todos los campos son obligatorios',
+      mostrar: true,
+      error: true
+    })
+    return
+  }
+  
+  await store.obtenerRecetas()
+  await nextTick() // Espera a que el DOM se actualice
 
+  if (store.recetas && store.recetas.length > 0) {
+    // Se ectualiza el hash y el router hará el scroll suave
+    router.push({ hash: '#titulo' }) // dispara scroll
+  } else {
+  router.push({ hash: '' }) // limpia el hash y evita scroll
+}
+}
 </script>
+
 
 <template>
     <header
@@ -75,7 +83,7 @@ import { useNotificacionStore } from '@/stores/notificaciones';
             <div class="space-y-4">
                 <label 
                 class="block text-white uppercase font-extrabold text-lg"
-                for="ingrediente">Nombre o ingredientes</label>
+                for="ingrediente">Nombre o ingredientes <span class="lowercase font-bold">(en inglés)</span></label>
                 <input 
                    id="ingrediente"
                    type="text"

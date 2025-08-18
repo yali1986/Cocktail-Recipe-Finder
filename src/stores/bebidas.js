@@ -45,16 +45,53 @@ export const useBebidasStore = defineStore('bebidas', () => {
     }     
   })
 
-  async function obtenerRecetas() {
+async function obtenerRecetas() {
+  recetas.value = []  
   const categoriaOriginal = traduccionesInversas[busqueda.categoria] || busqueda.categoria
-  const datosBusqueda = {
-    ...busqueda,
-    categoria: categoriaOriginal
-  }
+  const datosBusqueda = { ...busqueda, categoria: categoriaOriginal }
 
-  const { data: { drinks } } = await APIService.buscarRecetas(datosBusqueda)
-  recetas.value = drinks
+  try {
+    const { data: { drinks } } = await APIService.buscarRecetas(datosBusqueda)
+    if (!drinks) {
+      recetas.value = []
+      return
+    }
+
+    const busquedaNombre = busqueda.nombre.toLowerCase().trim()
+
+    // Si no se escribió nada en el input, devolvemos todas las recetas de la categoría
+    if (!busquedaNombre) {
+      recetas.value = drinks
+      return
+    }
+
+    // Si se escribió algo en el input, filtramos resultados
+    const filtradas = []
+
+    // Hacemos fetch detallado solo para las recetas de esta categoría
+    // que potencialmente coinciden
+    const fetchPromises = drinks.map(async drink => {
+      const { data: { drinks: detalle } } = await APIService.buscarReceta(drink.idDrink)
+      const det = detalle[0]
+      const nombre = det.strDrink?.toLowerCase() || ''
+      const ingredientes = Array.from({ length: 15 }, (_, i) => det[`strIngredient${i+1}`]?.toLowerCase() || '')
+
+      if (nombre.includes(busquedaNombre) || ingredientes.some(ing => ing.includes(busquedaNombre))) {
+        filtradas.push(det)
+      }
+    })
+
+    // Esperamos a que terminen todos los fetch
+    await Promise.all(fetchPromises)
+
+    recetas.value = filtradas
+
+  } catch (error) {
+    console.error('Error al buscar recetas:', error)
+    recetas.value = []
+  }  
 }
+
 
   async function seleccionarBebida(id) {
   const {data: {drinks}} = await APIService.buscarReceta(id)
