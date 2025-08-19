@@ -77,12 +77,12 @@ const handleSubmit = async () => {
 
         <form 
         v-if="paginaInicio"
-        class="md:w-1/2 2xl:w-1/3 bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6"       
+        class="md:w-1/2 2xl:w-1/3 bg-[#C5DF86] my-32 p-10 rounded-lg shadow space-y-6 opacity-98"       
         @submit.prevent="handleSubmit"
         >
             <div class="space-y-4">
                 <label 
-                class="block text-white uppercase font-extrabold text-lg"
+                class="block text-[#2B3A4B] uppercase font-extrabold text-lg"
                 for="ingrediente">Nombre o ingredientes <span class="lowercase font-bold">(en inglés)</span></label>
                 <input 
                    id="ingrediente"
@@ -95,7 +95,7 @@ const handleSubmit = async () => {
 
             <div class="space-y-4">
                 <label 
-                class="block text-white uppercase font-extrabold text-lg"
+                class="block text-[#2B3A4B] uppercase font-extrabold text-lg"
                 for="categoria">Categoría</label>
                 <select
                    id="categoria"                  
@@ -114,7 +114,7 @@ const handleSubmit = async () => {
 
             <input 
             type="submit"
-            class="bg-orange-800 hover:bg-orange-900 cursor pointer text-white font-extrabold w-full p-2 rounded-lg uppercase"
+            class="bg-[#8DB44C] hover:bg-[#FF9706] cursor pointer text-[#2B3A4B] font-extrabold w-full p-2 rounded-lg uppercase shadow-md"
             value="Buscar Recetas"
             />
 
@@ -126,7 +126,7 @@ const handleSubmit = async () => {
 </template>
 <style>
  .header {
-    background-image: url('/img/bg.jpg');
+    background-image: url('/img/bebidas6.jpeg');
     background-size: cover;
     background-position: center;
  }
