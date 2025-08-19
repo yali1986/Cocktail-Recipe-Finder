@@ -15,6 +15,7 @@ const bebidas = useBebidasStore()
         v-for="receta in bebidas.recetas"
         :receta="receta"
         :key="receta.idDrink"
+        
         />
 
       </div>

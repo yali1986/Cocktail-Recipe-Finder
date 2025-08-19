@@ -14,9 +14,9 @@ const notificaciones = useNotificacionStore()
 const paginaInicio = computed(() => route.name === 'inicio')
 
 const handleSubmit = async () => {
-  if (Object.values(store.busqueda).includes('')) {
+  if (!store.busqueda.nombre && !store.busqueda.categoria) {
     notificaciones.$patch({
-      texto: 'Todos los campos son obligatorios',
+      texto: 'Ingresa al menos un criterio: nombre o categoría',
       mostrar: true,
       error: true
     })

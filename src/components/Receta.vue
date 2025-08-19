@@ -3,11 +3,12 @@ import { useBebidasStore } from '@/stores/bebidas';
 
 const bebidas = useBebidasStore()
 
-  defineProps({
+  const props = defineProps({
     receta: {
         type: Object
     }
   })
+
 </script>
 
 <template>
