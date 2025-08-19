@@ -48,6 +48,13 @@ export const useBebidasStore = defineStore('bebidas', () => {
     }
   })
 
+  // Lista de categorías siempre traducidas (derivada)
+  const categoriasEs = computed(() => {
+    return categorias.value.map(cat => ({
+      strCategory: traducciones[cat.strCategory] || cat.strCategory
+    }))
+  })
+
   async function obtenerRecetas() {
   recetas.value = []
 
@@ -55,12 +62,78 @@ export const useBebidasStore = defineStore('bebidas', () => {
   const datosBusqueda = { ...busqueda, categoria: categoriaOriginal }
 
   try {
-    // Caso 1: nombre e categoría -> intersección
-    if (busqueda.nombre && categoriaOriginal) {
-      const resCategoria = await APIService.buscarRecetas({ categoria: categoriaOriginal, nombre: '' })
-      const drinksCategoria = resCategoria.data.drinks || []
+    // Utilidades de normalización para comparar ingredientes/nombres
+    const normalize = (str) => (str || '').toString().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    const generateQueryVariants = (q) => {
+      const variants = new Set([q])
+      if (q.endsWith('y')) variants.add(q.slice(0, -1) + 'ies')
+      if (q.endsWith('ies')) variants.add(q.slice(0, -3) + 'y')
+      if (q.endsWith('s')) variants.add(q.slice(0, -1))
+      variants.add(q + 's')
+      return Array.from(variants)
+    }
+    const ingredientMatchesQuery = (ingredient, query) => {
+      const i = normalize(ingredient)
+      const base = normalize(query)
+      const variants = generateQueryVariants(base)
+      return variants.some(v => v && i.includes(v))
+    }
 
-      // Obtener detalles para poder filtrar por ingredientes o nombre
+    const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '')
+    const fetchByIngredientVariants = async (rawQuery) => {
+      const q = (rawQuery || '').trim()
+      if (!q) return []
+      const lower = q.toLowerCase()
+      const cap = capitalize(lower)
+      const pluralS = lower.endsWith('s') ? lower : `${lower}s`
+      const pluralSCap = capitalize(pluralS)
+      const ies = lower.endsWith('y') ? `${lower.slice(0, -1)}ies` : lower
+      const iesCap = capitalize(ies)
+      const candidates = Array.from(new Set([q, lower, cap, pluralS, pluralSCap, ies, iesCap]))
+
+      const results = await Promise.all(
+        candidates.map(async (c) => {
+          try {
+            const res = await APIService.buscarPorIngrediente(c)
+            return Array.isArray(res.data?.drinks) ? res.data.drinks : []
+          } catch {
+            return []
+          }
+        })
+      )
+      const flat = results.flat()
+      const uniqueById = new Map(flat.map(d => [d.idDrink, d]))
+      return Array.from(uniqueById.values())
+    }
+
+    // Caso 1: nombre e categoría -> intersección usando endpoints de filtro (más preciso)
+    if (busqueda.nombre && categoriaOriginal) {
+      const [resCategoria, drinksIngrediente] = await Promise.all([
+        APIService.buscarRecetas({ categoria: categoriaOriginal, nombre: '' }),
+        fetchByIngredientVariants(busqueda.nombre.trim())
+      ])
+
+      const drinksCategoriaRaw = resCategoria.data && resCategoria.data.drinks
+
+      const drinksCategoria = Array.isArray(drinksCategoriaRaw) ? drinksCategoriaRaw : []
+
+      const idsCategoria = new Set(drinksCategoria.map(d => d.idDrink))
+      const idsIngrediente = new Set(drinksIngrediente.map(d => d.idDrink))
+      const idsInterseccion = Array.from(idsCategoria).filter(id => idsIngrediente.has(id))
+
+      if (idsInterseccion.length > 0) {
+        const detalles = []
+        for (const id of idsInterseccion) {
+          const r = await APIService.buscarReceta(id)
+          if (r.data && r.data.drinks && r.data.drinks[0]) {
+            detalles.push(r.data.drinks[0])
+          }
+        }
+        recetas.value = detalles
+        return
+      }
+
+      // Segundo intento: filtrar localmente la categoría por ingredientes/nombre
       const detallesCategoria = []
       for (const d of drinksCategoria) {
         const r = await APIService.buscarReceta(d.idDrink)
@@ -69,35 +142,20 @@ export const useBebidasStore = defineStore('bebidas', () => {
         }
       }
 
-      const query = busqueda.nombre.toLowerCase()
+      const query = busqueda.nombre.trim()
       const filtradas = detallesCategoria.filter(det => {
-        const nombreCoincide = (det.strDrink || '').toLowerCase().includes(query)
+        const nombreCoincide = normalize(det.strDrink).includes(normalize(query))
         let ingredienteCoincide = false
         for (let i = 1; i <= 15; i++) {
           const ing = det[`strIngredient${i}`]
-          if (ing && ing.toLowerCase().includes(query)) {
+          if (ing && ingredientMatchesQuery(ing, query)) {
             ingredienteCoincide = true
             break
           }
         }
         return nombreCoincide || ingredienteCoincide
       })
-
-      if (filtradas.length > 0) {
-        recetas.value = filtradas
-        return
-      }
-
-      // Fallback: intentar solo por nombre, y luego por ingrediente
-      const resNombreSolo = await APIService.buscarRecetas({ nombre: busqueda.nombre, categoria: '' })
-      const drinksNombreSolo = resNombreSolo.data.drinks || []
-      if (drinksNombreSolo.length > 0) {
-        recetas.value = drinksNombreSolo
-        return
-      }
-
-      const resIngredienteSolo = await APIService.buscarPorIngrediente(busqueda.nombre)
-      recetas.value = resIngredienteSolo.data.drinks || []
+      recetas.value = filtradas
       return
     }
 
@@ -111,8 +169,7 @@ export const useBebidasStore = defineStore('bebidas', () => {
       }
 
       // Fallback por ingrediente
-      const resIngrediente = await APIService.buscarPorIngrediente(busqueda.nombre)
-      const drinksIngrediente = resIngrediente.data.drinks || []
+      const drinksIngrediente = await fetchByIngredientVariants(busqueda.nombre)
       recetas.value = drinksIngrediente
       return
     }
@@ -154,6 +211,7 @@ export const useBebidasStore = defineStore('bebidas', () => {
 
   return {
     categorias,
+    categoriasEs,
     busqueda,
     recetas,
     receta,

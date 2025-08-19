@@ -105,7 +105,7 @@ const handleSubmit = async () => {
 
                 <option value="">-- Seleccione --</option>
                 <option
-                  v-for="categoria in store.categorias"
+                  v-for="categoria in store.categoriasEs"
                   :key="categoria.strCategory"
                   :value="categoria.strCategory"
                 >{{ categoria.strCategory }} </option>
