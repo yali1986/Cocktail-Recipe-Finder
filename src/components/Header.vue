@@ -126,7 +126,7 @@ const handleSubmit = async () => {
 </template>
 <style>
  .header {
-    background-image: url('/img/bebidas6.jpeg');
+    background-image: url('/img/bebidas7.png');
     background-size: cover;
     background-position: center;
  }
