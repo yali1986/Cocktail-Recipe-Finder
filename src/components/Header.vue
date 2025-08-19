@@ -43,31 +43,31 @@ const handleSubmit = async () => {
     >
       <div class="mx-auto container px-5 py-16">
         <div class="flex justify-between items-center">
-          <div>
+          <div class="bg-white/20 backdrop-blur-md rounded p-4 shadow-lg">
             <RouterLink
               :to="{name: 'inicio'}"
             >
               <img class="w-32" src="/img/logo.svg" alt="Logotipo" />
             </RouterLink>
           </div>
-         <nav class="flex gap-4">
+         <nav class="flex gap-4 bg-amber-400/80 backdrop-blur-md p-2 rounded">
   <RouterLink :to="{ name: 'inicio' }" v-slot="{ isExactActive }">
     <span :class="[
-      isExactActive ? 'text-orange-500' : 'text-white',
+      isExactActive ? 'text-[#2B3A4B]' : 'text-white',
       'uppercase font-bold'
     ]">Inicio</span>
   </RouterLink>
 
   <RouterLink :to="{ name: 'favoritos' }" v-slot="{ isExactActive }">
     <span :class="[
-      isExactActive ? 'text-orange-500' : 'text-white',
+      isExactActive ? 'text-[#2B3A4B]' : 'text-white',
       'uppercase font-bold'
     ]">Favoritos</span>
   </RouterLink>
   
   <RouterLink :to="{ name: 'ia' }" v-slot="{ isExactActive }">
     <span :class="[
-      isExactActive ? 'text-orange-500' : 'text-white',
+      isExactActive ? 'text-[#2B3A4B]' : 'text-white',
       'uppercase font-bold'
     ]">Generar con IA</span>
   </RouterLink>
@@ -83,7 +83,7 @@ const handleSubmit = async () => {
             <div class="space-y-4">
                 <label 
                 class="block text-[#2B3A4B] uppercase font-extrabold text-lg"
-                for="ingrediente">Nombre o ingredientes <span class="lowercase font-bold">(en inglés)</span></label>
+                for="ingrediente">Nombre o ingrediente <span class="lowercase font-bold">(en inglés)</span></label>
                 <input 
                    id="ingrediente"
                    type="text"
@@ -114,7 +114,7 @@ const handleSubmit = async () => {
 
             <input 
             type="submit"
-            class="bg-[#8DB44C] hover:bg-[#FF9706] cursor pointer text-[#2B3A4B] font-extrabold w-full p-2 rounded-lg uppercase shadow-md"
+            class="bg-[#8DB44C] hover:bg-[#FF9706] cursor pointer text-[#2B3A4B] font-extrabold w-full p-4 rounded-lg uppercase shadow-md"
             value="Buscar Recetas"
             />
 
