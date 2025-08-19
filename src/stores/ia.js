@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import IAService from '../services/IAService'
+import { marked } from 'marked'
 
 export const useIAStore = defineStore('ia', () => {
     const prompt = ref('')
     const respuesta = ref('')
+    const respuestaHtml = computed(()=> marked(respuesta.value)) 
     const cargando = ref(false)
     const error = ref('')
 
@@ -42,6 +44,7 @@ export const useIAStore = defineStore('ia', () => {
     return {
         prompt,
         respuesta,
+        respuestaHtml,
         error,
         cargando,
         generarReceta

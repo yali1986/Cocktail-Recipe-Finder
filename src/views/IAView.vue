@@ -53,8 +53,6 @@
     </form>
 
     <p v-if="store.cargando" class="text-center animate-blink">Generando...</p>
-    <div class="py-10 whitespace-pre-wrap">
-      {{ store.respuesta }}
-    </div>
+    <div class="py-10 prose" v-html="store.respuestaHtml"></div>
   </div>
 </template>
